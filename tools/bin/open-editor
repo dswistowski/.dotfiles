@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+open () {
+  echo $1 "$2" > ~/.current-editor
+  $1 "$2"
+}
+
+if [[ $# -eq 1 ]]; then
+    selected=$1
+else
+    selected=$(find ~/projects ~/babylon ~/babylon/monoweb ~/babylon/monoweb/lib ~/babylon/atlas.js/packages ~/babylon/atlas.js/sites -mindepth 1 -maxdepth 1  -type d | fzf)
+fi
+
+if [[ -z $selected ]]; then
+    exit 0
+fi
+
+if [[ -f ./pyproject.toml ]]; then
+    open pycharm "$selected"
+    exit 0
+fi
+    
+if [[ -f ./package.json ]]; then
+   open webstorm "$selected"
+   exit 0
+fi
+
+if [[ -f ./Cargo.toml ]]; then
+    open clion "$selected"
+    exit 0
+fi
+
+open vi "$selected"
+
+
