@@ -5,7 +5,7 @@ prompt pure
 
 
 export NVM_AUTO_USE=true
-source ~/.zsh/plugins/zsh-nvm/zsh-nvm.plugin.zsh
+# source ~/.zsh/plugins/zsh-nvm/zsh-nvm.plugin.zsh
 
 
 # TTY sends different key codes. Translate them to regular.
@@ -36,6 +36,8 @@ export SHIPCAT_MANIFEST_DIR=/Users/damian.swistowski/babylon/manifests
 
 
 alias ls='ls --color=auto'
+alias vi=nvim
+alias vim=nvim
 
 export PATH="$HOME/bin:$PATH"
 export PYENV_ROOT="$HOME/.pyenv"
