@@ -5,7 +5,7 @@ prompt pure
 
 
 export NVM_AUTO_USE=true
-# source ~/.zsh/plugins/zsh-nvm/zsh-nvm.plugin.zsh
+source ~/.zsh/plugins/zsh-nvm/zsh-nvm.plugin.zsh
 
 
 # TTY sends different key codes. Translate them to regular.
@@ -61,7 +61,18 @@ export PATH="$PATH:./node_modules/.bin"
 
 export FZF_DEFAULT_COMMAND='ag -g ""'
 
-bindkey -s '^f' 'tmux-sessioniser^M'
+# bindkey -s '^f' 'tmux-sessioniser^M'
 bindkey -s '^o' 'nvim $(fzf)^M'
 bindkey -s '^e' 'open-editor $(pwd)^M'
 
+
+# run command after going to directory
+autoload -U add-zsh-hook
+
+_local_rc_after_cd() {
+    if [ -f .localrc ]; then
+        source .localrc
+    fi
+}
+
+add-zsh-hook chpwd _local_rc_after_cd
