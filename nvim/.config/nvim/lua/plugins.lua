@@ -76,5 +76,6 @@ return require('packer').startup(function(use)
       }
   }
   use("folke/neodev.nvim")
+  use("folke/which-key.nvim")
 
 end)
