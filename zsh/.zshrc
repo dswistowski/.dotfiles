@@ -76,3 +76,6 @@ _local_rc_after_cd() {
 }
 
 add-zsh-hook chpwd _local_rc_after_cd
+
+export PATH="$PATH:$HOME/go/bin/"
+

@@ -9,17 +9,6 @@ lsp.ensure_installed({
   'gopls',
 })
 
--- Fix Undefined global 'vim'
-lsp.configure('lua-language-server', {
-    settings = {
-        Lua = {
-            diagnostics = {
-                globals = { 'vim' }
-            }
-        }
-    }
-})
-
 
 local cmp = require('cmp')
 local cmp_select = {behavior = cmp.SelectBehavior.Select}
@@ -36,6 +25,8 @@ local cmp_mappings = lsp.defaults.cmp_mappings({
   ['<C-f>'] = cmp.mapping.scroll_docs(4),
 })
 
+vim.api.nvim_create_user_command('Format', vim.lsp.buf.format, {})
+
 -- cmp_mappings['<Tab>'] = nil
 -- cmp_mappings['<S-Tab>'] = nil
 
@@ -44,7 +35,7 @@ lsp.setup_nvim_cmp({
 })
 
 lsp.set_preferences({
-    suggest_lsp_servers = false,
+    suggest_lsp_servers = true,
     sign_icons = {
         error = 'E',
         warn = 'W',
@@ -57,6 +48,7 @@ lsp.on_attach(function(client, bufnr)
   local opts = {buffer = bufnr, remap = false}
 
   vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
+  vim.keymap.set("n", "gD", function() vim.lsp.buf.declaration() end, opts)
   vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
   vim.keymap.set("n", "<leader>vws", function() vim.lsp.buf.workspace_symbol() end, opts)
   vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, opts)
@@ -69,7 +61,7 @@ lsp.on_attach(function(client, bufnr)
   vim.keymap.set("n", "<F6>", function() vim.lsp.buf.rename() end, opts)
   vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
 
-  client.server_capabilities.hoverProvider = false
+  -- client.server_capabilities.hoverProvider = false
 end)
 
 require('lspconfig').ruff_lsp.setup {

@@ -1,10 +1,30 @@
 #!/usr/bin/env bash
 
 
+subpaths() {
+    dir = $1
+    if [ -d dir ]
+    then
+        find $dir -mindepth 1 -maxdepth 1  -type d 
+    fi
+}
+
+paths() {
+    echo "$HOME/"
+    echo "$HOME/projects"
+    echo "$HOME/bin"
+    echo "$HOME/.dotfiles/"
+    find ~/projects ~/babylon -mindepth 1 -maxdepth 1  -type d 
+    subpaths ~/babylon/atlas.js/packages
+    subpaths ~/babylon/atlas.js/sites
+    subpaths ~/babylon/monoweb
+    subpaths ~/babylon/monoweb/lib
+}
+
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    selected=$(find ~/projects ~/babylon ~/babylon/monoweb ~/babylon/monoweb/lib ~/babylon/atlas.js/packages ~/babylon/atlas.js/sites -mindepth 1 -maxdepth 1  -type d | fzf)
+    selected=$(paths | fzf)
 fi
 
 if [[ -z $selected ]]; then

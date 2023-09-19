@@ -12,7 +12,6 @@ return require('packer').startup(function(use)
 	  -- or                            , branch = '0.1.x',
 	  requires = { {'nvim-lua/plenary.nvim'} }
   }
- 
   use("dracula/vim")
 
   use({
@@ -38,7 +37,7 @@ return require('packer').startup(function(use)
 
   use {
 	  'VonHeikemen/lsp-zero.nvim',
-	  branch = 'v1.x',
+	  branch = 'v2.x',
 	  requires = {
 		  -- LSP Support
 		  {'neovim/nvim-lspconfig'},
