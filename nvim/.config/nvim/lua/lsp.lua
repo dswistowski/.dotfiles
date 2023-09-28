@@ -2,37 +2,58 @@ local lsp = require("lsp-zero")
 
 lsp.preset("recommended")
 
-lsp.ensure_installed({
-  'tsserver',
-  'rust_analyzer',
-  'pyright',
-  'gopls',
-})
+  require('mason').setup({})
+  require('mason-lspconfig').setup({
+    -- Replace the language servers listed here 
+    -- with the ones you want to install
+    ensure_installed = {'tsserver', 'rust_analyzer', 'pyright', 'gopls'},
+    handlers = {
+      lsp.default_setup,
+    },
+  })
 
+  local cmp = require('cmp')
+  local cmp_action = require('lsp-zero').cmp_action()
 
-local cmp = require('cmp')
-local cmp_select = {behavior = cmp.SelectBehavior.Select}
-local cmp_mappings = lsp.defaults.cmp_mappings({
-  ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-  ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-  ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-  ["<C-Space>"] = cmp.mapping.complete(),
-  ['<Tab>'] = cmp.mapping.confirm({ select = true }),
-  ['<S-Tab>'] = cmp.mapping.select_prev_item(cmp_select),
-  ['<CR>'] = cmp.mapping.confirm({ select = true }),
-  ['<C-e>'] = cmp.mapping.close(),
-  ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-  ['<C-f>'] = cmp.mapping.scroll_docs(4),
-})
-
+  cmp.setup({
+    window = {
+      completion = cmp.config.window.bordered(),
+      documentation = cmp.config.window.bordered(),
+    },
+    mapping = cmp.mapping.preset.insert({
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-f>'] = cmp_action.luasnip_jump_forward(),
+      ['<C-b>'] = cmp_action.luasnip_jump_backward(),
+      ['<C-u>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-d>'] = cmp.mapping.scroll_docs(4),
+    }),
+    sources = {
+      {name = 'nvim_lsp'},
+    }
+ })
+-- local cmp = require('cmp')
+-- local cmp_select = {behavior = cmp.SelectBehavior.Select}
+-- local cmp_mappings = lsp.defaults.cmp_mappings({
+--   ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
+--   ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
+--   ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+--   ["<C-Space>"] = cmp.mapping.complete(),
+--   ['<Tab>'] = cmp.mapping.confirm({ select = true }),
+--   ['<S-Tab>'] = cmp.mapping.select_prev_item(cmp_select),
+--   ['<CR>'] = cmp.mapping.confirm({ select = true }),
+--   ['<C-e>'] = cmp.mapping.close(),
+--   ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+--   ['<C-f>'] = cmp.mapping.scroll_docs(4),
+-- })
+-- 
 vim.api.nvim_create_user_command('Format', vim.lsp.buf.format, {})
 
 -- cmp_mappings['<Tab>'] = nil
 -- cmp_mappings['<S-Tab>'] = nil
 
-lsp.setup_nvim_cmp({
-  mapping = cmp_mappings
-})
+-- lsp.setup_nvim_cmp({
+--   mapping = cmp_mappings
+-- })
 
 lsp.set_preferences({
     suggest_lsp_servers = true,
