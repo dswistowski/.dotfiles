@@ -28,7 +28,7 @@ require("lazy").setup({
   -- refer to the configuration section below
  },
 },
-  {"nvim-treesitter/nvim-treesitter" },
+  "nvim-treesitter/nvim-treesitter",
   "nvim-treesitter/playground",
   "theprimeagen/harpoon",
   "theprimeagen/refactoring.nvim",
@@ -75,5 +75,9 @@ require("lazy").setup({
   "folke/neodev.nvim",
   "folke/which-key.nvim",
   "ThePrimeagen/vim-be-good",
+  "nvim-tree/nvim-tree.lua",
+  "nvim-tree/nvim-web-devicons",
+
+
 })
 
