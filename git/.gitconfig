@@ -1,11 +1,11 @@
 [user]
 	name = Damian Świstowski
-	email = damian@swistowski.org
+    email = damian@swistowski.org
 	signingkey = EC192BC644363A8AB10F2701441DECE75B8EEDA9
 [credential]
     helper = store
 [core]
-	editor = vim
+	editor = nvim
 	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
 	excludesfile = ~/.gitignore
 [web]
@@ -13,7 +13,7 @@
 [instaweb]
 	httpd = apache2 -f
 [rerere]
-	enabled = 1
+	enabled = true
 	autoupdate = 1
 [push]
 	default = current
@@ -44,7 +44,11 @@
     lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
     last = log -1 HEAD
     recentb = "!r() { refbranch=$1 count=$2; git for-each-ref --sort=-committerdate refs/heads --format='%(refname:short)|%(HEAD)%(color:yellow)%(refname:short)|%(color:bold green)%(committerdate:relative)|%(color:blue)%(subject)|%(color:magenta)%(authorname)%(color:reset)' --color=always --count=${count:-20} | while read line; do branch=$(echo \"$line\" | awk 'BEGIN { FS = \"|\" }; { print $1 }' | tr -d '*'); colorline=$(echo \"$line\" | sed 's/^[^|]*|//'); echo \"$colorline\" | awk -F'|' -vOFS='|' '{$5=substr($5,1,70)}1' ; done | ( echo \"branch|lastcommit|message|author\\n\" && cat) | column -ts'|';}; r"
-    branch-list = "!r() { refbranch=$1 count=$2; git for-each-ref --sort=-committerdate refs/heads --format='%(refname:short)|%(HEAD)%(color:yellow)%(refname:short)|%(color:bold green)%(committerdate:relative)|%(color:blue)%(subject)|%(color:magenta)%(authorname)%(color:reset)' --color=always --count=${count:-20} | while read line; do branch=$(echo \"$line\" | awk 'BEGIN { FS = \"|\" }; { print $1 }' | tr -d '*'); colorline=$(echo \"$line\" | sed 's/^[^|]*|//'); echo \"$colorline\" | awk -F'|' -vOFS='|' '{$5=substr($5,1,70)}1' ; done | ( echo \"branch|lastcommit|message|author\\n\" && cat) | column -ts'|';}; r"
+    branch-list = "!r() { refbranch=$1 count=$2; git for-each-ref --sort=-committerdate refs/heads --format='%(refname:short)|%(HEAD)%(color:yellow)%(refname:short)|%(color:bold green)%(committerdate:relative)|%(color:blue)%(subject)|%(color:magenta)%(authorname)%(color:reset)' --color=always --count=${count:-10} | while read line; do branch=$(echo \"$line\" | awk 'BEGIN { FS = \"|\" }; { print $1 }' | tr -d '*'); colorline=$(echo \"$line\" | sed 's/^[^|]*|//'); echo \"$colorline\" | awk -F'|' -vOFS='|' '{$5=substr($5,1,70)}1' ; done | ( echo \"branch|lastcommit|message|author\\n\" && cat) | column -ts'|';}; r"
+    staash = "stash --all"
+	bb = !better-git-branch.sh
+    bblame = blame -w -C -C -C
+    wd = diff --word-diff
 
 
 [color]
@@ -69,11 +73,11 @@
   ui = true
 [core]
   whitespace=fix,-indent-with-non-tab,trailing-space
-    editor = vim
+    editor = nvim
 	autocrlf = input
 
 [commit]
-	gpgsign = true
+	gpgsign = true 
 [gpg]
 	program = gpg
 [filter "lfs"]
@@ -81,9 +85,18 @@
 	required = true
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
-# [url "git@github.com:"]
-#	insteadOf = https://github.com/
 [pull]
 	ff = only
 [init]
 	defaultBranch = main
+
+# [includeIf "gitdir:~/genie/"]
+#     path = ~/genie/.gitconfig
+[column]
+	ui = auto
+[branch]
+	sort = -committerdate
+[maintenance]
+#	repo = /Users/damian/genie/data-provider
+#	repo = /Users/damian/genie/ui
+

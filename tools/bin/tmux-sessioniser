@@ -14,11 +14,9 @@ paths() {
     echo "$HOME/projects"
     echo "$HOME/bin"
     echo "$HOME/.dotfiles/"
-    find ~/projects ~/babylon -mindepth 1 -maxdepth 1  -type d 
-    subpaths ~/babylon/atlas.js/packages
-    subpaths ~/babylon/atlas.js/sites
-    subpaths ~/babylon/monoweb
-    subpaths ~/babylon/monoweb/lib
+    # no longer valid, but keeping it for reference
+    # find ~/projects ~/genie ~/interviews -mindepth 1 -maxdepth 1  -type d 
+    # subpaths ~/babylon/monoweb/lib
 }
 
 if [[ $# -eq 1 ]]; then

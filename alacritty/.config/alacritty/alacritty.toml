@@ -11,16 +11,19 @@ unfocused_hollow = true
 size = 16.5
 
 [font.bold]
-family = "Iosevka"
+# family = "Hack Nerd Font"
+family = "IosevkaTerm Nerd Font"
 style = "Bold"
 
 [font.italic]
-family = "Iosevka"
+# family = "Hack Nerd Font"
+family = "IosevkaTerm Nerd Font"
 style = "Light Italic"
 
 [font.normal]
-family = "Iosevka"
-style = "Light"
+# family = "Hack Nerd Font"
+# family = "Fira Code"
+family = "Hack Nerd Font"
 
 [[keyboard.bindings]]
 action = "Paste"

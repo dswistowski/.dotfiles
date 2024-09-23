@@ -1,6 +1,6 @@
 vim.g.mapleader = " "
--- vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
-vim.keymap.set("n", "<leader>pv", vim.cmd.NvimTreeFocus)
+vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
+-- vim.keymap.set("n", "<leader>pv", vim.cmd.NvimTreeFocus)
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
@@ -17,6 +17,7 @@ vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")
 vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
+vim.keymap.set("n", "<F2>", vim.diagnostic.goto_next)
 
 
 
@@ -29,3 +30,16 @@ vim.keymap.set("n", "gR", function() require("trouble").open("lsp_references") e
 
 vim.keymap.set("n", "[q", "<cmd>:cprevious<CR>zz")
 vim.keymap.set("n", "]q", "<cmd>:cnext<CR>zz")
+
+
+
+local function quickfix()
+    vim.lsp.buf.code_action({
+        filter = function(a) return a.isPreferred end,
+        apply = true
+    })
+end
+
+local opts = { noremap=true, silent=true }
+
+vim.keymap.set('n', '<leader>qf', quickfix, opts)
