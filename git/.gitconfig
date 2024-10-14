@@ -90,8 +90,8 @@
 [init]
 	defaultBranch = main
 
-# [includeIf "gitdir:~/genie/"]
-#     path = ~/genie/.gitconfig
+[includeIf "gitdir:~/rated/"]
+    path = ~/rated/.gitconfig
 [column]
 	ui = auto
 [branch]

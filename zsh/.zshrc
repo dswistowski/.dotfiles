@@ -8,7 +8,6 @@ compinit
 
 export NVM_AUTO_USE=true
 source ~/.zsh/plugins/zsh-nvm/zsh-nvm.plugin.zsh
-source /Users/damian/.zsh/ohmyzsh/plugins/dotnet/dotnet.plugin.zsh
 
 # TTY sends different key codes. Translate them to regular.
 bindkey -s '^[[1~' '^[[H'  # home
@@ -43,8 +42,13 @@ export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 export PIPENV_PYTHON="$PYENV_ROOT/shims/python"
 
+ZSH=$HOME/.oh-my-zsh
+source $ZSH/oh-my-zsh.sh
+
 plugin=(
   pyenv
+  dotenv
+  git
 )
 
 eval "$(pyenv init -)"
@@ -106,3 +110,18 @@ GIT_EDITOR=nvim
 
 autoload -U +X bashcompinit && bashcompinit
 complete -o nospace -C /opt/homebrew/bin/vault vault
+
+
+autoload -U add-zsh-hook
+
+load_dotenv() {
+    if [ -f .env ]
+    then
+        set -a
+        source .env
+        set +a
+        echo "ℹ️ .env loaded"
+    fi
+}
+
+add-zsh-hook chpwd load_dotenv

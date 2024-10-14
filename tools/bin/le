@@ -1,4 +1,4 @@
 #!/bin//bash
 
-cat .env | grep -v ^# | grep -v ^$ | sed  -e 's/^/export /'
+cat $1 | grep -v ^# | grep -v ^$ | sed  -e 's/^/export /'
 
