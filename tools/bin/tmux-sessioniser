@@ -16,6 +16,7 @@ paths() {
     echo "$HOME/bin"
     echo "$HOME/.dotfiles/"
     echo "$HOME/rated/slaOs/e2e"
+    echo "$HOME/rated/slaOs/slaos-cli"
     find ~/projects ~/rated ~/rated/frontend-monorepo/apps ~/rated/slaOS/e2e -mindepth 1 -maxdepth 1 -type d | grep -v .venv | grep -v .idea
     # no longer valid, but keeping it for reference
     # find ~/projects ~/genie ~/interviews -mindepth 1 -maxdepth 1  -type d 

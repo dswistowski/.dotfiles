@@ -38,7 +38,6 @@ alias vi=nvim
 alias vim=nvim
 
 export PATH="$HOME/bin:$PATH"
-export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 export PIPENV_PYTHON="$PYENV_ROOT/shims/python"
 
@@ -46,13 +45,10 @@ ZSH=$HOME/.oh-my-zsh
 source $ZSH/oh-my-zsh.sh
 
 plugin=(
-  pyenv
   dotenv
   git
 )
 
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
 
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/Library/Android/sdk/platform-tools:$PATH"
 export PATH="$HOME/google-cloud-sdk/bin:$PATH"
