@@ -1,4 +1,7 @@
+require('harpoon').setup()
+
 local harpoon = require('harpoon.ui')
+
 vim.keymap.set('n', '<leader>gg', harpoon.toggle_quick_menu, {})
 vim.keymap.set('n', '<leader>ga', require("harpoon.mark").add_file, {})
 vim.keymap.set('n', '[h', harpoon.nav_next, {})
@@ -22,6 +25,8 @@ vim.keymap.set('n', '<leader>7', function() harpoon.nav_file(7) end, {})
 vim.keymap.set('n', '<leader>8', function() harpoon.nav_file(8) end, {})
 
 
+vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, {desc = 'Rename Symbol'})
+vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, {desc = 'Code Action'})
+
 
 require("telescope").load_extension('harpoon')
-

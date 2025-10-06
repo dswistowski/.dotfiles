@@ -1,81 +1,28 @@
--- Init lazy package manager
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", -- latest stable release
-    lazypath,
-  })
-end
-vim.opt.rtp:prepend(lazypath)
+vim.pack.add{
 
-require("lazy").setup({
-    'wbthomason/packer.nvim',
-    {
-    'nvim-telescope/telescope.nvim', branch = '0.1.x',
-          dependencies = { {'nvim-lua/plenary.nvim'} }
-      },
-  "dracula/vim",
-{
- "folke/trouble.nvim",
- dependencies = { "nvim-tree/nvim-web-devicons" },
- opts = {
-  -- your configuration comes here
-  -- or leave it empty to use the default settings
-  -- refer to the configuration section below
- },
-},
-  "nvim-treesitter/nvim-treesitter",
-  "nvim-treesitter/playground",
-  "theprimeagen/harpoon",
-  "theprimeagen/refactoring.nvim",
-  "mbbill/undotree",
-  "tpope/vim-fugitive",
-  "nvim-treesitter/nvim-treesitter-context",
-  {
-	  'VonHeikemen/lsp-zero.nvim',
-	  branch = 'v3.x',
-	  dependencies = {
-		  -- LSP Support
-		  {'neovim/nvim-lspconfig'},
-		  {'williamboman/mason.nvim'},
-		  {'williamboman/mason-lspconfig.nvim'},
+  { src = 'https://github.com/neovim/nvim-lspconfig' },
+  { src = 'https://github.com/mason-org/mason.nvim' },
+  { src = 'https://github.com/mason-org/mason-lspconfig.nvim' },
+  { src = 'https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim' },
+  { src = 'https://github.com/nvim-telescope/telescope.nvim' },
+  { src = 'https://github.com/nvim-lua/plenary.nvim' },
+  { src = 'https://github.com/nvim-tree/nvim-web-devicons' },
+  { src = 'https://github.com/folke/trouble.nvim' },
+  { src = 'https://github.com/ThePrimeagen/harpoon' },
+  { src = 'https://github.com/nvim-treesitter/nvim-treesitter', version = "master" },
+  { src = 'https://github.com/nvim-treesitter/nvim-treesitter-context' },
+  { src = 'https://github.com/github/copilot.vim' },
 
-		  -- Autocompletion
-		  {'hrsh7th/nvim-cmp'},
-		  {'hrsh7th/cmp-buffer'},
-		  {'hrsh7th/cmp-path'},
-		  {'saadparwaiz1/cmp_luasnip'},
-		  {'hrsh7th/cmp-nvim-lsp'},
-		  {'hrsh7th/cmp-nvim-lua'},
 
-		  -- Snippets
-		  {'L3MON4d3/LuaSnip'},
-		  {'rafamadriz/friendly-snippets'},
-	  }
-  },
-  "folke/zen-mode.nvim",
-  -- "github/copilot.vim",
-  "eandrju/cellular-automaton.nvim",
-  "laytan/cloak.nvim",
-    {
-      "nvim-neotest/neotest",
-      dependencies = {
-          "nvim-lua/plenary.nvim",
-          "nvim-treesitter/nvim-treesitter",
-          "antoinemadec/FixCursorHold.nvim",
-          "nvim-neotest/neotest-python",
-          "nvim-neotest/neotest-plenary",
-          "nvim-neotest/neotest-vim-test"
-      }
-  },
-  "folke/neodev.nvim",
-  "folke/which-key.nvim",
-  "ThePrimeagen/vim-be-good",
-  "nvim-tree/nvim-tree.lua",
-  "nvim-tree/nvim-web-devicons",
-})
+  { src = "https://github.com/hrsh7th/nvim-cmp" },            -- completion engine
+  { src = "https://github.com/hrsh7th/cmp-nvim-lsp" },        -- LSP source for cmp
+  { src = "https://github.com/hrsh7th/cmp-buffer" },          -- buffer words
+  { src = "https://github.com/hrsh7th/cmp-path" },            -- filesystem paths
+  { src = "https://github.com/hrsh7th/cmp-cmdline" },         -- command line
+  { src = "https://github.com/L3MON4D3/LuaSnip" },            -- snippet engine
+  { src = "https://github.com/saadparwaiz1/cmp_luasnip" },    -- snippets source
+
+  { src = 'https://github.com/catppuccin/nvim', name = 'catppuccin' },
+  { src = 'https://github.com/tpope/vim-fugitive' },
+}
 

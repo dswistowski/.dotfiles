@@ -28,4 +28,9 @@ vim.opt.isfname:append("@-@")
 vim.opt.updatetime = 50
 
 vim.opt.colorcolumn = "88"
-vim.cmd("colorscheme dracula")
+vim.cmd("colorscheme", "catppuccin-macchiato")
+-- vim.cmd("colorscheme dracula")
+-- vim.cmd.colorscheme "catppuccin"
+
+
+-- vim.o.winbar = "%f %m"

@@ -1,7 +1,4 @@
-require "settings"
-require "remap"
-require "plugins"
-require "lsp"
-require "treesitter"
-require "neotest_config"
--- require "treeview"
+require("settings")
+require("plugins")
+require("keymaps")
+

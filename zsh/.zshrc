@@ -38,6 +38,7 @@ alias vi=nvim
 alias vim=nvim
 
 export PATH="$HOME/bin:$PATH"
+export PATH="$(yarn global bin):$PATH"
 export PATH="$PYENV_ROOT/bin:$PATH"
 export PIPENV_PYTHON="$PYENV_ROOT/shims/python"
 
@@ -121,3 +122,26 @@ load_dotenv() {
 }
 
 add-zsh-hook chpwd load_dotenv
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/damian/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/damian/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/damian/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/damian/google-cloud-sdk/completion.zsh.inc'; fi
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/damian/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
+#
+#
+load-env() {
+  if [ -f "$1" ]; then
+    set -o allexport
+    source "$1"
+    set +o allexport
+  else
+    echo "load-env: file '$1' not found"
+    return 1
+  fi
+}
