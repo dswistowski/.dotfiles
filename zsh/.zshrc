@@ -145,3 +145,4 @@ load-env() {
     return 1
   fi
 }
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
