@@ -70,6 +70,8 @@ echo "$FINAL_MSG"
 echo "-------------------------------------"
 
 read -rp "Use this commit message? (y/n) " CONFIRM
+CONFIRM=${CONFIRM:-y}   # empty input defaults to yes
+
 if [[ "$CONFIRM" == "y" ]]; then
   if [[ $AMEND -eq 1 ]]; then
     git commit --amend -m "$FINAL_MSG"
