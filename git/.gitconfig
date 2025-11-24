@@ -1,7 +1,7 @@
 [user]
 	name = Damian Świstowski
     email = damian@swistowski.org
-	signingkey = EC192BC644363A8AB10F2701441DECE75B8EEDA9
+	signingkey = 02BB9BEC18726296FF8FD8B246431B3CA25DB81C
 [credential]
     helper = store
 [core]

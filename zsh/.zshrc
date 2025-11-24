@@ -80,7 +80,6 @@ add-zsh-hook chpwd _local_rc_after_cd
 
 export PATH="$PATH:$HOME/go/bin/"
 source <(kubectl completion zsh)
-export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
 
 # pnpm
 export PNPM_HOME="/Users/damian/Library/pnpm"
@@ -145,4 +144,3 @@ load-env() {
     return 1
   fi
 }
-export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
