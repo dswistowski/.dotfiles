@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export OPENAI_API_KEY=$(pass personl/OPENAI_API_KEY)
-
 AMEND=0
-MODEL="${OPENAI_MODEL:-gpt-4.1-mini}"
 
+# Parse flags
 if [[ "${1:-}" == "--amend" ]]; then
   AMEND=1
 fi
 
-# Use staged diff, or diff to HEAD when amending
+# Load diff
 if [[ $AMEND -eq 1 ]]; then
   DIFF=$(git diff HEAD || true)
 else
@@ -26,7 +24,7 @@ if [[ -z "$DIFF" ]]; then
   exit 1
 fi
 
-# Extract DI ticket from branch name
+# Extract DI ticket identifier from branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [[ "$BRANCH" =~ (DI-[0-9]+) ]]; then
   TICKET="[${BASH_REMATCH[1]}]"
@@ -35,7 +33,7 @@ else
 fi
 
 ##########################################
-# AUTO GITMOJI
+# AUTO-SELECT GITMOJI
 ##########################################
 pick_gitmoji() {
   local d="$1"
@@ -43,10 +41,9 @@ pick_gitmoji() {
   if echo "$d" | grep -qiE "test|spec|assert"; then echo ":white_check_mark:"; return; fi
   if echo "$d" | grep -qiE "README|docs|documentation|\\.md"; then echo ":memo:"; return; fi
   if echo "$d" | grep -qiE "refactor|cleanup|rename"; then echo ":recycle:"; return; fi
-  if echo "$d" | grep -qiE "package.json|go.mod|Cargo.toml|requirements.txt|yarn.lock"; then echo ":arrow_up:"; return; fi
+  if echo "$d" | grep -qiE "package.json|yarn.lock|go.mod|Cargo.toml"; then echo ":arrow_up:"; return; fi
   if echo "$d" | grep -qiE "config|\\.env|\\.ya?ml|\\.toml"; then echo ":wrench:"; return; fi
   if echo "$d" | grep -qiE "remove|delete|deprecated"; then echo ":fire:"; return; fi
-  if echo "$d" | grep -qiE "security|auth|permission"; then echo ":lock:"; return; fi
   if echo "$d" | grep -qiE "ui|css|html|frontend"; then echo ":lipstick:"; return; fi
   echo ":sparkles:"
 }
@@ -54,18 +51,17 @@ pick_gitmoji() {
 GITMOJI=$(pick_gitmoji "$DIFF")
 
 ##########################################
-# OPENAI CALL (correct syntax)
+# GENERATE COMMIT MESSAGE USING CODEX CLI
 ##########################################
-generate_ai_msg() {
-  local d="$1"
+AI_MSG=$(
+  codex exec \
+"Write a short, clear git commit message in imperative mood.
+Do NOT include emojis or ticket IDs.
+Summarize this diff:
 
-  uv tool run openai api chat.completions.create \
-    --model "$MODEL" \
-    --message system "Write a short, clear git commit message in imperative mood. No emojis. No ticket IDs." \
-    --message user "Summarize this diff into a git commit message:\n\n$d"
-}
-
-AI_MSG=$(generate_ai_msg "$DIFF")
+$DIFF" \
+  2>/dev/null
+)
 
 FINAL_MSG="$GITMOJI $TICKET $AI_MSG"
 
@@ -74,7 +70,6 @@ echo "$FINAL_MSG"
 echo "-------------------------------------"
 
 read -rp "Use this commit message? (y/n) " CONFIRM
-
 if [[ "$CONFIRM" == "y" ]]; then
   if [[ $AMEND -eq 1 ]]; then
     git commit --amend -m "$FINAL_MSG"
