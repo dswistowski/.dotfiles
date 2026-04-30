@@ -5,13 +5,6 @@ return {
 		opts = require("configs.conform"),
 	},
 
-	-- These are some examples, uncomment them if you want to see them work!
-	{
-		"neovim/nvim-lspconfig",
-		config = function()
-			require("configs.lspconfig")
-		end,
-	},
 
 	-- test new blink
 	{ import = "nvchad.blink.lazyspec" },
@@ -25,6 +18,7 @@ return {
 				"vimdoc",
 				"html",
 				"css",
+        "python",
 			},
 		},
 	},
@@ -35,9 +29,10 @@ return {
 			"williamboman/mason-lspconfig.nvim",
 		},
 		config = function()
+			require("configs.lspconfig")
 			require("mason").setup()
 			require("mason-lspconfig").setup({
-				ensure_installed = { "pyright", "ruff" },
+				ensure_installed = { "pyright", "ruff", "zuban" },
 			})
 		end,
 	},

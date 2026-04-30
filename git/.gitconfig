@@ -92,6 +92,8 @@
 
 [includeIf "gitdir:~/rated/"]
     path = ~/rated/.gitconfig
+[includeIf "gitdir:~/waycore/"]
+    path = ~/waycore/.gitconfig
 [column]
 	ui = auto
 [branch]
