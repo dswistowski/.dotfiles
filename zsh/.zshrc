@@ -1,85 +1,40 @@
-fpath+=($HOME/.zsh/pure)
+# Oh My Zsh
+export ZSH="$HOME/.oh-my-zsh"
 
-autoload -U promptinit; promptinit
-prompt pure
-
-autoload -Uz compinit
-compinit
-
-export NVM_AUTO_USE=true
-source ~/.zsh/plugins/zsh-nvm/zsh-nvm.plugin.zsh
-
-# TTY sends different key codes. Translate them to regular.
-bindkey -s '^[[1~' '^[[H'  # home
-bindkey -s '^[[4~' '^[[F'  # end
-
-autoload -Uz up-line-or-beginning-search
-autoload -Uz down-line-or-beginning-search
-zle -N up-line-or-beginning-search
-zle -N down-line-or-beginning-search
-
-bindkey '^?'      backward-delete-char          # bs         delete one char backward
-bindkey '^[[3~'   delete-char                   # delete     delete one char forward
-bindkey '^[[H'    beginning-of-line             # home       go to the beginning of line
-bindkey '^[[F'    end-of-line                   # end        go to the end of line
-bindkey '^[[1;5C' forward-word                  # ctrl+right go forward one word
-bindkey '^[[1;5D' backward-word                 # ctrl+left  go backward one word
-bindkey '^H'      backward-kill-word            # ctrl+bs    delete previous word
-bindkey '^[[3;5~' kill-word                     # ctrl+del   delete next word
-bindkey '^J'      backward-kill-line            # ctrl+j     delete everything before cursor
-bindkey '^[[D'    backward-char                 # left       move cursor one char backward
-bindkey '^[[C'    forward-char                  # right      move cursor one char forward
-bindkey '^[[A'    up-line-or-beginning-search   # up         prev command in history
-bindkey '^[[B'    down-line-or-beginning-search # down       next command in history
-
-
-alias ls='ls --color=auto'
-alias vi=nvim
-alias vim=nvim
-
-export PATH="$HOME/bin:$PATH"
-export PATH="$(yarn global bin):$PATH"
-export PATH="$PYENV_ROOT/bin:$PATH"
-export PIPENV_PYTHON="$PYENV_ROOT/shims/python"
-
-ZSH=$HOME/.oh-my-zsh
-source $ZSH/oh-my-zsh.sh
-
-plugin=(
+plugins=(
   dotenv
   git
+  nvm
 )
 
+# Completion paths before Oh My Zsh loads completions
+fpath=(
+  "$HOME/.zfunc"
+  "$HOME/.docker/completions"
+  "$HOME/.local/share/zsh/site-functions"
+  "$HOME/.zfunc"
+  $fpath
+)
 
-export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/Library/Android/sdk/platform-tools:$PATH"
+source "$ZSH/oh-my-zsh.sh"
+
+# Prompt: Pure
+fpath+=("$HOME/.zsh/pure")
+autoload -Uz promptinit
+promptinit
+prompt pure
+
+# PATH
+export PATH="$HOME/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/Library/Android/sdk/platform-tools:$PATH"
 export PATH="$HOME/google-cloud-sdk/bin:$PATH"
-
-source "$HOME/.cargo/env"
-
-fpath+=~/.zfunc
-autoload -Uz compinit && compinit
 export PATH="$PATH:./node_modules/.bin"
+export PATH="$PATH:$HOME/go/bin"
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+export PATH="/Users/damian/bin:/opt/homebrew/bin:$PATH"
 
-export FZF_DEFAULT_COMMAND='ag -g ""'
-
-# bindkey -s '^f' 'tmux-sessioniser^M'
-bindkey -s '^o' 'nvim $(fzf)^M'
-bindkey -s '^e' 'open-editor $(pwd)^M'
-
-
-# run command after going to directory
-autoload -U add-zsh-hook
-
-_local_rc_after_cd() {
-    if [ -f .localrc ]; then
-        source .localrc
-    fi
-}
-
-add-zsh-hook chpwd _local_rc_after_cd
-
-export PATH="$PATH:$HOME/go/bin/"
-source <(kubectl completion zsh)
+# Python / pyenv
+export PATH="$PYENV_ROOT/bin:$PATH"
+export PIPENV_PYTHON="$PYENV_ROOT/shims/python"
 
 # pnpm
 export PNPM_HOME="/Users/damian/Library/pnpm"
@@ -87,53 +42,97 @@ case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
-# pnpm end
 
+# Cargo
+[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 
-# tabtab source for packages
-# uninstall by removing these lines
-[[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
+# Better autocomplete behavior
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' menu select
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
 
-if (( ${+INTELIJ} )); then
-#    /Users/damian/bin/tmux-jump-in
-fi
+# Bash-style completions
+autoload -Uz bashcompinit
+bashcompinit
 
-# bun completions
-[ -s "/Users/damian/.bun/_bun" ] && source "/Users/damian/.bun/_bun"
+# Google Cloud SDK
+[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ] && source "$HOME/google-cloud-sdk/path.zsh.inc"
+[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
 
+# Vault completion
+[ -x /opt/homebrew/bin/vault ] && complete -o nospace -C /opt/homebrew/bin/vault vault
 
-GIT_EDITOR=nvim
+# Bun completions
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /opt/homebrew/bin/vault vault
+# Tabtab completions
+[ -f "$HOME/.config/tabtab/zsh/__tabtab.zsh" ] && source "$HOME/.config/tabtab/zsh/__tabtab.zsh"
 
+# NVM
+export NVM_AUTO_USE=true
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
 
-autoload -U add-zsh-hook
+# Aliases
+alias ls='ls --color=auto'
+alias vi=nvim
+alias vim=nvim
 
-load_dotenv() {
-    if [ -f .env ]
-    then
-        set -a
-        source .env
-        set +a
-        echo "ℹ️ .env loaded"
-    fi
+# TTY sends different key codes. Translate them to regular.
+bindkey -s '^[[1~' '^[[H'
+bindkey -s '^[[4~' '^[[F'
+
+# History search
+autoload -Uz up-line-or-beginning-search
+autoload -Uz down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+
+# Key bindings
+bindkey '^?'      backward-delete-char
+bindkey '^[[3~'   delete-char
+bindkey '^[[H'    beginning-of-line
+bindkey '^[[F'    end-of-line
+bindkey '^[[1;5C' forward-word
+bindkey '^[[1;5D' backward-word
+bindkey '^H'      backward-kill-word
+bindkey '^[[3;5~' kill-word
+bindkey '^J'      backward-kill-line
+bindkey '^[[D'    backward-char
+bindkey '^[[C'    forward-char
+bindkey '^[[A'    up-line-or-beginning-search
+bindkey '^[[B'    down-line-or-beginning-search
+
+# FZF
+export FZF_DEFAULT_COMMAND='ag -g ""'
+bindkey -s '^o' 'nvim $(fzf)^M'
+bindkey -s '^e' 'open-editor $(pwd)^M'
+
+# Hooks
+autoload -Uz add-zsh-hook
+
+_local_rc_after_cd() {
+  if [ -f .localrc ]; then
+    source .localrc
+  fi
 }
 
+load_dotenv() {
+  if [ -f .env ]; then
+    set -a
+    source .env
+    set +a
+    echo "ℹ️ .env loaded"
+  fi
+}
+
+add-zsh-hook chpwd _local_rc_after_cd
 add-zsh-hook chpwd load_dotenv
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/damian/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/damian/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/damian/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/damian/google-cloud-sdk/completion.zsh.inc'; fi
-# The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/damian/.docker/completions $fpath)
-autoload -Uz compinit
-compinit
-# End of Docker CLI completions
-#
-#
+# Helper
 load-env() {
   if [ -f "$1" ]; then
     set -o allexport
@@ -144,9 +143,17 @@ load-env() {
     return 1
   fi
 }
-export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-export PATH="/Users/damian/bin:/opt/homebrew/bin:$PATH"
 
+# Editor
+export GIT_EDITOR=nvim
+export AWS_PROFILE=Developer-310188666820
+export AWS_REGION=us-east-1
+export AWS_DEFAULT_REGION=us-east-1
 
-# sentry
-fpath=("/Users/damian/.local/share/zsh/site-functions" $fpath)
+# pnpm
+export PNPM_HOME="/Users/damian/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end
