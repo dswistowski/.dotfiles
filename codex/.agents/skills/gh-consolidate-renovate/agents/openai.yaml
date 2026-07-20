@@ -1,0 +1,4 @@
+interface:
+  display_name: "Consolidate Renovate PRs"
+  short_description: "Combine multiple Renovate dependency PRs into one validated PR."
+  default_prompt: "Consolidate the open Renovate PRs for this repository into a single green, mergeable PR."
