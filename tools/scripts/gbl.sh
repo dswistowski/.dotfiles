@@ -5,7 +5,7 @@
 # Requires: git, gh, jq, and this directory's `gba.sh`.
 #
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-allowed_dirs=("$HOME/dev")
+allowed_dirs=("$HOME/ledgy")
 CYAN='\033[0;36m'
 BOLD='\033[1m'
 DIM='\033[2m'
