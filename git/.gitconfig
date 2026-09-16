@@ -77,7 +77,7 @@
 	autocrlf = input
 
 [commit]
-	gpgsign = true
+	gpgsign = false 
 [gpg]
 	program = gpg
 [filter "lfs"]
@@ -94,6 +94,8 @@
     path = ~/rated/.gitconfig
 [includeIf "gitdir:~/waycore/"]
     path = ~/waycore/.gitconfig
+[includeIf "gitdir:~/ledgy/"]
+    path = ~/ledgy/.gitconfig
 [column]
 	ui = auto
 [branch]

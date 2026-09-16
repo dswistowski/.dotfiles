@@ -11,12 +11,13 @@ subpaths() {
 
 paths() {
     echo "$HOME/"
-    echo "$HOME/waycore"
+    # echo "$HOME/waycore"
     echo "$HOME/projects"
     # echo "$HOME/rated"
     echo "$HOME/bin"
     echo "$HOME/.dotfiles/"
-    find ~/projects ~/waycore /Users/damian/waycore/frontend/apps -mindepth 1 -maxdepth 1 -type d | grep -v .venv | grep -v .idea
+    echo "$HOME/ledgy"
+    find ~/projects ~/ledgy -mindepth 1 -maxdepth 1 -type d | grep -v .venv | grep -v .idea
 
     # find ~/projects ~/rated ~/rated/frontend-monorepo/apps ~/rated/clove -mindepth 1 -maxdepth 1 -type d | grep -v .venv | grep -v .idea
     # no longer valid, but keeping it for reference
