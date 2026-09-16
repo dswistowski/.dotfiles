@@ -1,32 +1,22 @@
 return {
-    "ThePrimeagen/harpoon",
-    branch = "harpoon2",
-  lazy = false,
+  "ThePrimeagen/harpoon",
+  branch = "harpoon2",
+  dependencies = { "nvim-lua/plenary.nvim" },
+  keys = {
+    { "<leader>la", function() require("harpoon"):list():add() end, desc = "Harpoon Add File" },
+    {
+      "<leader>ll",
+      function() require("harpoon").ui:toggle_quick_menu(require("harpoon"):list()) end,
+      desc = "Harpoon Menu",
+    },
+    { "<leader>l1", function() require("harpoon"):list():select(1) end, desc = "Harpoon File 1" },
+    { "<leader>l2", function() require("harpoon"):list():select(2) end, desc = "Harpoon File 2" },
+    { "<leader>l3", function() require("harpoon"):list():select(3) end, desc = "Harpoon File 3" },
+    { "<leader>l4", function() require("harpoon"):list():select(4) end, desc = "Harpoon File 4" },
+    { "<leader>l]", function() require("harpoon"):list():next() end, desc = "Harpoon Next" },
+    { "<leader>l[", function() require("harpoon"):list():prev() end, desc = "Harpoon Previous" },
+  },
   config = function()
-    local harpoon = require("harpoon")
-
-    -- REQUIRED
-    harpoon:setup()
-    -- REQUIRED
-
-    -- Add file
-    vim.keymap.set("n", "<leader>la", function()
-      harpoon:list():add()
-    end, { desc = "Add to Harpoon" })
-
-    -- Quick menu
-    vim.keymap.set("n", "<leader>ll", function()
-      harpoon.ui:toggle_quick_menu(harpoon:list())
-    end, { desc = "Harpoon Menu" })
-
-    -- Direct nav
-    vim.keymap.set("n", "<leader>l1", function() harpoon:list():select(1) end, { desc = "Harpoon file 1" })
-    vim.keymap.set("n", "<leader>l2", function() harpoon:list():select(2) end, { desc = "Harpoon file 2" })
-    vim.keymap.set("n", "<leader>l3", function() harpoon:list():select(3) end, { desc = "Harpoon file 3" })
-    vim.keymap.set("n", "<leader>l3", function() harpoon:list():select(4) end, { desc = "Harpoon file 4" })
-
-    -- Cycle
-    vim.keymap.set("n", "<leader>l]", function() harpoon:list():prev() end, { desc = "Harpoon prev" })
-    vim.keymap.set("n", "<leader>l[", function() harpoon:list():next() end, { desc = "Harpoon next" })
+    require("harpoon"):setup()
   end,
 }
