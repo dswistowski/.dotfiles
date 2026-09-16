@@ -4,7 +4,6 @@ export ZSH="$HOME/.oh-my-zsh"
 plugins=(
   dotenv
   git
-  nvm
 )
 
 # Completion paths before Oh My Zsh loads completions
@@ -70,11 +69,6 @@ bashcompinit
 # Tabtab completions
 [ -f "$HOME/.config/tabtab/zsh/__tabtab.zsh" ] && source "$HOME/.config/tabtab/zsh/__tabtab.zsh"
 
-# NVM
-export NVM_AUTO_USE=true
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
 
 # Aliases
 alias ls='ls --color=auto'
@@ -157,3 +151,11 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
 esac
 # pnpm end
+eval "$(fnm env --use-on-cd --shell zsh)"
+
+
+
+#
+alias gba='~/scripts/gba.sh'
+alias gbd='~/scripts/gbd.sh'
+alias gbl='~/scripts/gbl.sh'
