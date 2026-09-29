@@ -1,51 +1,102 @@
 #!/usr/bin/env bash
+#
+# fzf-pick a directory and switch/create a tmux session for it.
+#
+# Entries come from three categories, each shown in the fzf list by a short
+# label rather than its full path:
+#   1. plain_paths      - fixed list of directories, labelled by name
+#   2. expand_dirs      - directories whose immediate children are listed
+#                          too, each labelled by its own directory name
+#   3. gb_project_roots  - gb-cli project roots (see ~/.dotfiles/tools/gb-cli);
+#                          each immediate child is a named clone, labelled
+#                          "<project-dir>/<clone-dir>"
+#
+# Each entry is emitted as "label<TAB>path<TAB>session-name": fzf shows only
+# the label, but the real path and a stable tmux session name travel with it.
 
+emit() {
+    local label=$1
+    local path=${2:-$1}
+    local session=${3:-$(basename "$path")}
+    printf '%s\t%s\t%s\n' "$label" "$path" "$session"
+}
 
-subpaths() {
-    dir = $1
-    if [ -d dir ]
-    then
-        find $dir -mindepth 1 -maxdepth 1  -type d 
+plain_paths() {
+    emit "~" "$HOME/"
+    emit "projects" "$HOME/projects"
+    emit "bin" "$HOME/bin"
+    emit ".dotfiles" "$HOME/.dotfiles/"
+    emit "ledgy" "$HOME/ledgy"
+}
+
+expand_dirs=(
+    "$HOME/projects"
+    "$HOME/ledgy"
+)
+
+gb_project_roots=(
+    "$HOME/ledgy/app"
+)
+
+children_of() {
+    local dir=$1
+    if [ -d "$dir" ]; then
+        find "$dir" -mindepth 1 -maxdepth 1 -type d
     fi
 }
 
-paths() {
-    echo "$HOME/"
-    # echo "$HOME/waycore"
-    echo "$HOME/projects"
-    # echo "$HOME/rated"
-    echo "$HOME/bin"
-    echo "$HOME/.dotfiles/"
-    echo "$HOME/ledgy"
-    find ~/projects ~/ledgy -mindepth 1 -maxdepth 1 -type d | grep -v .venv | grep -v .idea
+child_paths() {
+    local dir child
+    for dir in "${expand_dirs[@]}"; do
+        while IFS= read -r child; do
+            emit "$(basename "$child")" "$child"
+        done < <(children_of "$dir" | grep -v '\.venv' | grep -v '\.idea')
+    done
+}
 
-    # find ~/projects ~/rated ~/rated/frontend-monorepo/apps ~/rated/clove -mindepth 1 -maxdepth 1 -type d | grep -v .venv | grep -v .idea
-    # no longer valid, but keeping it for reference
-    # find ~/projects ~/genie ~/interviews -mindepth 1 -maxdepth 1  -type d 
-    # subpaths ~/babylon/monoweb/lib
+gb_clone_paths() {
+    local root project_name clone clone_name
+    for root in "${gb_project_roots[@]}"; do
+        project_name=$(basename "$root")
+        while IFS= read -r clone; do
+            clone_name=$(basename "$clone")
+            emit "$project_name/$clone_name" "$clone" "${project_name}_${clone_name}"
+        done < <(children_of "$root")
+    done
+}
+
+all_entries() {
+    plain_paths
+    child_paths
+    gb_clone_paths
 }
 
 if [[ $# -eq 1 ]]; then
-    selected=$1
+    selected_path=$1
+    selected_session=$(basename "$selected_path")
 else
-    selected=$(paths | fzf)
+    selection=$(all_entries | fzf --delimiter=$'\t' --with-nth=1)
+    if [[ -z $selection ]]; then
+        exit 0
+    fi
+    selected_path=$(printf '%s' "$selection" | cut -f2)
+    selected_session=$(printf '%s' "$selection" | cut -f3)
 fi
 
-if [[ -z $selected ]]; then
+if [[ -z $selected_path ]]; then
     exit 0
 fi
 
-
-selected_name=$(basename "$selected" | tr . _)
+selected_name=$(printf '%s' "$selected_session" | tr . _)
 tmux_running=$(pgrep tmux)
 
 if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
-    tmux new-session -s $selected_name -c $selected
+    tmux new-session -s "$selected_name" -c "$selected_path"
     exit 0
 fi
 
-if ! tmux has-session -t=$selected_name 2> /dev/null; then
-    tmux new-session -ds $selected_name -c $selected
+if ! tmux has-session -t="$selected_name" 2> /dev/null; then
+    tmux new-session -ds "$selected_name" -c "$selected_path"
 fi
 
-tmux switch-client -t $selected_name
+tmux switch-client -t "$selected_name"

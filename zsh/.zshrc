@@ -36,7 +36,7 @@ export PATH="$PYENV_ROOT/bin:$PATH"
 export PIPENV_PYTHON="$PYENV_ROOT/shims/python"
 
 # pnpm
-export PNPM_HOME="/Users/damian/Library/pnpm"
+export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
@@ -145,7 +145,7 @@ export AWS_REGION=us-east-1
 export AWS_DEFAULT_REGION=us-east-1
 
 # pnpm
-export PNPM_HOME="/Users/damian/Library/pnpm"
+export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME/bin:"*) ;;
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
@@ -153,9 +153,29 @@ esac
 # pnpm end
 eval "$(fnm env --use-on-cd --shell zsh)"
 
-
-
 #
-alias gba='~/scripts/gba.sh'
-alias gbd='~/scripts/gbd.sh'
-alias gbl='~/scripts/gbl.sh'
+unalias gb 2>/dev/null
+source ~/.dotfiles/tools/gb-cli/completions/gb.zsh
+#compdef gt
+###-begin-gt-completions-###
+#
+# yargs command completion script
+#
+# Installation: gt completion >> ~/.zshrc
+#    or gt completion >> ~/.zprofile on OSX.
+#
+_gt_yargs_completions()
+{
+  local reply
+  local si=$IFS
+  IFS=$'
+' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" gt --get-yargs-completions "${words[@]}"))
+  IFS=$si
+  _describe 'values' reply
+}
+compdef _gt_yargs_completions gt
+###-end-gt-completions-###
+
+export VOLTA_FEATURE_PNPM=1
+
+eval "$(direnv hook zsh)"
