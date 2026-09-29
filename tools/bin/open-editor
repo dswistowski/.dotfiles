@@ -11,6 +11,7 @@ else
     selected=$(find ~/projects ~/babylon ~/babylon/monoweb ~/babylon/monoweb/lib ~/babylon/atlas.js/packages ~/babylon/atlas.js/sites -mindepth 1 -maxdepth 1  -type d | fzf)
 fi
 
+
 if [[ -z $selected ]]; then
     exit 0
 fi
@@ -21,7 +22,8 @@ if [[ -f ./pyproject.toml ]]; then
 fi
     
 if [[ -f ./package.json ]]; then
-   open webstorm "$selected"
+   open code "$selected"
+
    exit 0
 fi
 
