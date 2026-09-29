@@ -14,6 +14,8 @@ return {
     { "<leader>fr", function() require("telescope.builtin").oldfiles() end, desc = "Recent Files" },
     { "<leader>fh", function() require("telescope.builtin").help_tags() end, desc = "Help Tags" },
     { "<leader>fd", function() require("telescope.builtin").diagnostics() end, desc = "Diagnostics" },
+    -- modified, staged and untracked files (git status)
+    { "<leader>fc", function() require("telescope.builtin").git_status() end, desc = "Changed Files" },
     {
       "<leader>fs",
       function() require("telescope.builtin").lsp_dynamic_workspace_symbols() end,

@@ -22,6 +22,7 @@ Leader key is `<Space>`.
 | `<leader>fr` | Recent files                |
 | `<leader>fh` | Help tags                  |
 | `<leader>fd` | Diagnostics list            |
+| `<leader>fc` | Changed files (git status)  |
 | `<leader>fs` | Workspace symbols           |
 
 ## LSP
