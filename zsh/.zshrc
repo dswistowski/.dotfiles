@@ -179,3 +179,7 @@ compdef _gt_yargs_completions gt
 export VOLTA_FEATURE_PNPM=1
 
 eval "$(direnv hook zsh)"
+
+export PNPM_HOME="/Users/dswistowski/Library/pnpm"
+
+export PATH="$PNPM_HOME/bin:$PATH"
