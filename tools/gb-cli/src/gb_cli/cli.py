@@ -66,13 +66,18 @@ def branches(all_: bool, clone_name: str | None) -> None:
 
 @cli.command("clean", short_help=f"Delete finished local branches.{_aliases_for('clean')}")
 @_repo_scope_options
-def clean(all_: bool, clone_name: str | None) -> None:
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show branches and worktrees that would be removed without deleting.",
+)
+def clean(all_: bool, clone_name: str | None, dry_run: bool) -> None:
     """Delete local branches (and worktrees) that are merged, closed, or empty.
 
     Defaults to the current repo, or to every clone under the project root
     when run from the root itself. --all/--clone override that.
     """
-    commands.run_clean(console, Path.cwd(), all_=all_, clone=clone_name)
+    commands.run_clean(console, Path.cwd(), all_=all_, clone=clone_name, dry_run=dry_run)
 
 
 @cli.command("repos", short_help=f"List clones under a project's root.{_aliases_for('repos')}")

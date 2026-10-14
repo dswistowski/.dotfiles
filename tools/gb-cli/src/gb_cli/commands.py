@@ -55,28 +55,39 @@ def _removal_reason(branch: str, base: str, cwd: Path) -> str | None:
 
 
 def _remove_worktrees_for_branch(
-    console: Console, branch: str, worktrees: list[git.Worktree], main_worktree: Path
-) -> bool:
-    """Returns True if all worktrees for `branch` were removed (or there were none)."""
+    console: Console,
+    branch: str,
+    worktrees: list[git.Worktree],
+    main_worktree: Path,
+    *,
+    dry_run: bool = False,
+) -> tuple[bool, int]:
+    """Returns whether the branch can be deleted and how many worktrees were (or would be) removed."""
     branch_esc = escape(branch)
+    removed = 0
     for wt in git.worktrees_for_branch(branch, worktrees):
         path = escape(git.home_path(wt.path))
         if wt.path == main_worktree:
             console.print(f"[yellow]Skip[/] {branch_esc}: checked out in the main worktree")
-            return False
+            return False, removed
         if git.worktree_is_dirty(wt.path):
             console.print(f"[yellow]Skip[/] {branch_esc}: dirty worktree {path}")
-            return False
+            return False, removed
+        if dry_run:
+            console.print(f"[dim]Would remove worktree[/] {path}")
+            removed += 1
+            continue
         try:
             git.run("worktree", "remove", str(wt.path), cwd=main_worktree)
         except git.GitError:
             console.print(f"[yellow]Skip[/] {branch_esc}: could not remove worktree {path}")
-            return False
+            return False, removed
         console.print(f"[dim]Removed worktree[/] {path}")
-    return True
+        removed += 1
+    return True, removed
 
 
-def clean_branches(console: Console, cwd: Path) -> None:
+def clean_branches(console: Console, cwd: Path, *, dry_run: bool = False) -> None:
     """Delete local branches (and worktrees) that are merged, closed, or empty."""
     if not git.is_git_repo(cwd):
         console.print(f"[red]Error[/] not a git repository: {escape(git.home_path(cwd))}")
@@ -86,6 +97,8 @@ def clean_branches(console: Console, cwd: Path) -> None:
     current = git.current_branch(cwd)
     branches = git.list_branches(cwd)
     worktrees = git.list_worktrees(cwd)
+    branches_to_delete = 0
+    worktrees_to_remove = 0
 
     for branch in branches:
         if branch == current or branch in PROTECTED_BRANCHES:
@@ -93,10 +106,17 @@ def clean_branches(console: Console, cwd: Path) -> None:
         reason = _removal_reason(branch, base, cwd)
         if reason is None:
             continue
-        if not _remove_worktrees_for_branch(console, branch, worktrees, main_worktree):
+        ok, wt_count = _remove_worktrees_for_branch(
+            console, branch, worktrees, main_worktree, dry_run=dry_run
+        )
+        if not ok:
             continue
-        console.print(f"[dim]Deleting[/] [bold]{escape(branch)}[/] ({reason})")
-        git.run("branch", "-D", branch, cwd=cwd)
+        worktrees_to_remove += wt_count
+        verb = "Would delete" if dry_run else "Deleting"
+        console.print(f"[dim]{verb}[/] [bold]{escape(branch)}[/] ({reason})")
+        if not dry_run:
+            git.run("branch", "-D", branch, cwd=cwd)
+        branches_to_delete += 1
 
     for wt, _kind in git.unmatched_worktrees(worktrees, branches):
         if wt.path == main_worktree:
@@ -108,14 +128,33 @@ def clean_branches(console: Console, cwd: Path) -> None:
         if git.worktree_is_dirty(wt.path):
             console.print(f"[yellow]Skip[/] dirty detached worktree {path}")
             continue
+        if dry_run:
+            console.print(
+                f"[dim]Would remove detached worktree[/] {path} (no unique commits vs {base})"
+            )
+            worktrees_to_remove += 1
+            continue
         try:
             git.run("worktree", "remove", str(wt.path), cwd=main_worktree)
         except git.GitError:
             console.print(f"[yellow]Skip[/] could not remove detached worktree {path}")
             continue
         console.print(f"[dim]Removed detached worktree[/] {path} (no unique commits vs {base})")
+        worktrees_to_remove += 1
 
-    console.print("\n[green]Done.[/]")
+    if dry_run:
+        console.print(
+            f"\n[bold]Summary:[/] would delete {branches_to_delete} branch"
+            f"{'es' if branches_to_delete != 1 else ''}, "
+            f"remove {worktrees_to_remove} worktree"
+            f"{'s' if worktrees_to_remove != 1 else ''}."
+        )
+        if branches_to_delete or worktrees_to_remove:
+            console.print("[dim]Re-run without --dry-run to apply.[/]")
+        else:
+            console.print("[dim]Nothing to clean.[/]")
+    else:
+        console.print("\n[green]Done.[/]")
 
 
 def _require_project(console: Console, cwd: Path) -> config.Project:
@@ -190,7 +229,14 @@ def run_branches(
         console.print()
 
 
-def run_clean(console: Console, cwd: Path, all_: bool = False, clone: str | None = None) -> None:
+def run_clean(
+    console: Console,
+    cwd: Path,
+    all_: bool = False,
+    clone: str | None = None,
+    *,
+    dry_run: bool = False,
+) -> None:
     """Clean finished branches in one repo, or in every clone under the project root."""
     targets, labeled = _resolve_targets(console, cwd, all_, clone)
     if not targets:
@@ -199,7 +245,7 @@ def run_clean(console: Console, cwd: Path, all_: bool = False, clone: str | None
     for target in targets:
         if labeled:
             console.print(f"[bold cyan]{escape(target.name)}[/]")
-        clean_branches(console, target)
+        clean_branches(console, target, dry_run=dry_run)
         if labeled:
             console.print()
 

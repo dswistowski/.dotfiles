@@ -116,6 +116,45 @@ def test_clean_branches_never_deletes_current_or_main(
     assert "main" in git.list_branches(git_repo)
 
 
+def test_clean_branches_dry_run_leaves_branches(
+    git_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _git("branch", "stale", cwd=git_repo)
+    monkeypatch.setattr(commands, "pr_view", lambda branch, cwd=None: None)
+
+    console, _ = _console()
+    commands.clean_branches(console, git_repo, dry_run=True)
+    output = _plain(console)
+
+    from gb_cli import git
+
+    assert "stale" in git.list_branches(git_repo)
+    assert "Would delete" in output
+    assert "Summary:" in output
+    assert "would delete 1 branch" in output
+
+
+def test_run_clean_dry_run_respects_all_scope(
+    git_repo: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _git("branch", "stale", cwd=git_repo)
+    parent = tmp_path / "parent"
+    parent.mkdir()
+    (parent / "default").symlink_to(git_repo)
+    config.write_project(parent, str(git_repo))
+    monkeypatch.setattr(commands, "pr_view", lambda branch, cwd=None: None)
+
+    console, _ = _console()
+    commands.run_clean(console, parent, all_=True, dry_run=True)
+    output = _plain(console)
+
+    from gb_cli import git
+
+    assert "stale" in git.list_branches(git_repo)
+    assert "default" in output
+    assert "Would delete" in output
+
+
 def test_list_repos_rejects_dir_not_a_project_root(
     tmp_path: Path,
 ) -> None:

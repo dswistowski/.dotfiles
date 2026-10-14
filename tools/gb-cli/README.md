@@ -5,7 +5,8 @@ Git branch/worktree helper with a single `gb` command and subcommands
 
 - `gb branches` (`gb a`) — show local branches with their GitHub PR status and worktree.
 - `gb clean` (`gb d`) — delete local branches (and worktrees) that are merged,
-  closed, or have no unique commits vs the default branch.
+  closed, or have no unique commits vs the default branch. Use `--dry-run` to
+  preview deletions and see a summary.
 - `gb repos` (`gb l`) — run `branches` for every clone under a configured project's root.
 - `gb init` (`gb i`) `REMOTE [PATH]` — create or adopt PATH (default: current
   directory) as a project root for REMOTE.
@@ -20,23 +21,24 @@ Requires `git` and `gh` on `PATH`.
 
 ## Configuration
 
-`repos`/`clone`/`remove`/`init` read and write project definitions in a
-TOML config file, default `$XDG_CONFIG_HOME/gb-cli/config.toml` (or
-`~/.config/gb-cli/config.toml`), overridable with `GB_CONFIG_FILE`:
+Multi-clone projects are defined by a **`gb.toml` marker file at the project root**
+(not a global config file). `gb` walks up from the current directory until it
+finds `gb.toml`:
 
 ```toml
-# ~/.config/gb-cli/config.toml
-[projects.ledgy-app]
-root = "~/ledgy-app"
+# ~/ledgy-app/gb.toml
 remote = "git@github.com:ledgy/ledgy-app.git"
 ```
 
-Each project is a `root` directory holding independent full clones of
+Each project is a directory (`root`) holding independent full clones of
 `remote` — e.g. `~/ledgy-app/default`, `~/ledgy-app/app1`,
 `~/ledgy-app/code-review`. Full clones (not worktrees) because tools like
 `gt` (Graphite) don't play well with worktrees. `clone`/`remove`/`repos`
-must be run from inside a project's `root`; `branches`/`clean` work on any
-git repo (e.g. inside `~/ledgy-app/default`) and don't need the config at all.
+must be run from inside a project's `root` or any subdirectory beneath it;
+`branches`/`clean` work on any git repo (e.g. inside `~/ledgy-app/default`)
+and don't need `gb.toml` at all.
+
+`gb init` writes or refreshes `gb.toml` at the project root.
 
 To bootstrap a layout from scratch, or adopt an existing single-directory
 checkout into it, run `gb init REMOTE [PATH]`:
@@ -49,11 +51,10 @@ cd ~/ledgy/app && gb init git@github.com:ledgy/ledgy-app.git
 
 If `PATH` (or the current directory) is already a checkout of `REMOTE`, it's
 moved to `<root>/default`; if it doesn't exist or is empty, `REMOTE` is
-cloned fresh into `<root>/default`. Either way a `[projects.<name>]` entry
-(`<name>` is the root directory's basename) is added to the config, so the
-root becomes usable with `repos`/`clone`/`remove` right away. Re-running
-`gb init` on an already-initialized root is a no-op that just (re)writes the
-config entry.
+cloned fresh into `<root>/default`. Either way `gb.toml` is written at the
+root, so the layout is usable with `repos`/`clone`/`remove` right away.
+Re-running `gb init` on an already-initialized root is a no-op that just
+(re)writes `gb.toml`.
 
 ## Development
 

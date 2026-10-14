@@ -30,20 +30,64 @@ def test_branches_alias_a(monkeypatch: pytest.MonkeyPatch) -> None:
     assert calls == [Path.cwd()]
 
 
-def test_clean_invokes_clean_branches(monkeypatch: pytest.MonkeyPatch) -> None:
-    calls: list[Path] = []
-    monkeypatch.setattr(commands, "clean_branches", lambda console, cwd: calls.append(cwd))
+def test_clean_invokes_run_clean(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[tuple[Path, bool]] = []
+
+    def fake_run_clean(
+        console: object,
+        cwd: Path,
+        all_: bool = False,
+        clone: str | None = None,
+        *,
+        dry_run: bool = False,
+    ) -> None:
+        calls.append((cwd, dry_run))
+
+    monkeypatch.setattr(commands, "run_clean", fake_run_clean)
 
     runner = CliRunner()
     result = runner.invoke(cli.cli, ["clean"])
 
     assert result.exit_code == 0
-    assert calls == [Path.cwd()]
+    assert calls == [(Path.cwd(), False)]
+
+
+def test_clean_dry_run_flag(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[bool] = []
+
+    def fake_run_clean(
+        console: object,
+        cwd: Path,
+        all_: bool = False,
+        clone: str | None = None,
+        *,
+        dry_run: bool = False,
+    ) -> None:
+        calls.append(dry_run)
+
+    monkeypatch.setattr(commands, "run_clean", fake_run_clean)
+
+    runner = CliRunner()
+    result = runner.invoke(cli.cli, ["clean", "--dry-run"])
+
+    assert result.exit_code == 0
+    assert calls == [True]
 
 
 def test_clean_alias_d(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[Path] = []
-    monkeypatch.setattr(commands, "clean_branches", lambda console, cwd: calls.append(cwd))
+
+    def fake_run_clean(
+        console: object,
+        cwd: Path,
+        all_: bool = False,
+        clone: str | None = None,
+        *,
+        dry_run: bool = False,
+    ) -> None:
+        calls.append(cwd)
+
+    monkeypatch.setattr(commands, "run_clean", fake_run_clean)
 
     runner = CliRunner()
     result = runner.invoke(cli.cli, ["d"])
