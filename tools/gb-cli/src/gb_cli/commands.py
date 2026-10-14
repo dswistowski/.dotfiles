@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 from rich.console import Console
 from rich.markup import escape
 
 from gb_cli import config, git, render
-from gb_cli.gh import pr_view
+from gb_cli.gh import merged_pr_for_branch, pr_view
 
 PROTECTED_BRANCHES = ("main", "master")
 
@@ -51,6 +52,11 @@ def _removal_reason(branch: str, base: str, cwd: Path) -> str | None:
             return f"#{pr.number} \\[{render.pr_state_label(pr)}\\] {render.pr_title(pr)}"
     if git.unique_commit_count(base, branch, cwd) == 0:
         return f"no unique commits vs {base}"
+    if git.is_ancestor(branch, base, cwd):
+        return f"merged into {base}"
+    merged = merged_pr_for_branch(branch, cwd)
+    if merged is not None:
+        return f"#{merged.number} \\[{render.pr_state_label(merged)}\\] {render.pr_title(merged)}"
     return None
 
 
@@ -62,7 +68,7 @@ def _remove_worktrees_for_branch(
     *,
     dry_run: bool = False,
 ) -> tuple[bool, int]:
-    """Returns whether the branch can be deleted and how many worktrees were (or would be) removed."""
+    """Whether the branch can be deleted and worktrees removed (or would be, in dry-run)."""
     branch_esc = escape(branch)
     removed = 0
     for wt in git.worktrees_for_branch(branch, worktrees):
@@ -255,6 +261,70 @@ def list_repos(console: Console, cwd: Path) -> None:
     run_branches(console, cwd, all_=True)
 
 
+def _format_fetch_time(when: datetime | None) -> str:
+    if when is None:
+        return "never"
+    return when.strftime("%Y-%m-%d %H:%M")
+
+
+def show_clone_status(console: Console, cwd: Path) -> None:
+    """Print a compact status line for one clone directory."""
+    branch = git.current_branch(cwd) or "(detached)"
+    dirty = "dirty" if git.worktree_is_dirty(cwd) else "clean"
+    unpushed = "unpushed" if git.has_unpushed_commits(cwd) else "pushed"
+    fetched = _format_fetch_time(git.last_fetch_time(cwd))
+    console.print(
+        f"  {escape(cwd.name):<16} {escape(branch):<24} {dirty:<6} {unpushed:<9} fetch {fetched}"
+    )
+
+
+def run_status(
+    console: Console, cwd: Path, all_: bool = False, clone: str | None = None
+) -> None:
+    """Show lightweight status for one clone or every clone under the project root."""
+    targets, labeled = _resolve_targets(console, cwd, all_, clone)
+    if not targets:
+        console.print("[dim]No clones found.[/]")
+        return
+    if labeled:
+        console.print(
+            f"[bold]{'clone':<16} {'branch':<24} {'':6} {'':9} last fetch[/]"
+        )
+    for target in targets:
+        if labeled:
+            show_clone_status(console, target)
+        else:
+            console.print(f"[bold]{escape(target.name)}[/]")
+            console.print(f"  branch     {escape(git.current_branch(target) or '(detached)')}")
+            console.print(
+                f"  working    {'dirty' if git.worktree_is_dirty(target) else 'clean'}"
+            )
+            upstream = (
+                "unpushed commits" if git.has_unpushed_commits(target) else "pushed"
+            )
+            console.print(f"  upstream   {upstream}")
+            console.print(f"  last fetch {_format_fetch_time(git.last_fetch_time(target))}")
+
+
+def sync_clones(
+    console: Console, cwd: Path, all_: bool = False, clone: str | None = None
+) -> None:
+    """Run `git fetch --prune` for one clone or every clone under the project root."""
+    targets, labeled = _resolve_targets(console, cwd, all_, clone)
+    if not targets:
+        console.print("[dim]No clones found.[/]")
+        return
+    for target in targets:
+        prefix = f"[bold cyan]{escape(target.name)}[/] " if labeled else ""
+        console.print(f"{prefix}[dim]Fetching[/] {escape(git.home_path(target))}")
+        try:
+            git.run("fetch", "--prune", cwd=target)
+        except git.GitError as exc:
+            console.print(f"[red]Error[/] {escape(str(exc))}")
+            raise SystemExit(1) from exc
+    console.print("[green]Done.[/]")
+
+
 def clone_copy(console: Console, cwd: Path, name: str) -> None:
     """Create a fresh full clone named NAME under the current project's root.
 
@@ -279,7 +349,8 @@ def clone_copy(console: Console, cwd: Path, name: str) -> None:
             f"(reusing objects from {escape(git.home_path(reference))})"
         )
     else:
-        console.print(f"[dim]Cloning[/] {escape(project.remote)} -> {escape(git.home_path(target))}")
+        dest = escape(git.home_path(target))
+        console.print(f"[dim]Cloning[/] {escape(project.remote)} -> {dest}")
     args += [project.remote, str(target)]
 
     try:
@@ -308,6 +379,19 @@ def remove_copy(
     resolved_cwd = cwd.resolve()
     if resolved_target == resolved_cwd or resolved_target in resolved_cwd.parents:
         console.print("[red]Error[/] refusing to remove the clone you are currently in.")
+        raise SystemExit(1)
+
+    extra_worktrees = [
+        wt
+        for wt in git.list_worktrees(target)
+        if wt.path.resolve() != resolved_target
+    ]
+    if extra_worktrees and not force:
+        paths = ", ".join(escape(git.home_path(wt.path)) for wt in extra_worktrees)
+        console.print(
+            f"[yellow]Refusing[/] to remove {escape(git.home_path(target))}: "
+            f"extra worktrees ({paths}). Remove them first or use --force."
+        )
         raise SystemExit(1)
 
     if not force:

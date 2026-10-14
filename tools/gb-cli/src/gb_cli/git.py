@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import subprocess
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 
 
@@ -129,6 +130,29 @@ def default_branch(cwd: Path | None = None) -> str:
         if candidate in branches:
             return candidate
     return "main"
+
+
+def is_ancestor(ancestor: str, descendant: str, cwd: Path | None = None) -> bool:
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0
+
+
+def git_path(relative: str, cwd: Path) -> Path:
+    resolved = run("rev-parse", "--git-path", relative, cwd=cwd)
+    path = Path(resolved)
+    return path if path.is_absolute() else cwd / path
+
+
+def last_fetch_time(cwd: Path) -> datetime | None:
+    fetch_head = git_path("FETCH_HEAD", cwd)
+    if not fetch_head.is_file():
+        return None
+    return datetime.fromtimestamp(fetch_head.stat().st_mtime)
 
 
 def unique_commit_count(base: str, ref: str, cwd: Path | None = None) -> int:

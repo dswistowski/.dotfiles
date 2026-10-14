@@ -204,7 +204,7 @@ def test_help_lists_subcommands() -> None:
     runner = CliRunner()
     result = runner.invoke(cli.cli, ["--help"])
     assert result.exit_code == 0
-    for name in ("branches", "clean", "repos", "clone", "remove", "init"):
+    for name in ("branches", "clean", "repos", "status", "sync", "clone", "remove", "init"):
         assert name in result.output
 
 

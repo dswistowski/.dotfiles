@@ -17,6 +17,16 @@ class PullRequest:
     url: str
 
 
+def _pull_request_from_json(data: dict[str, object]) -> PullRequest:
+    return PullRequest(
+        number=int(data["number"]),
+        title=str(data["title"]),
+        state=str(data["state"]),
+        is_draft=bool(data["isDraft"]),
+        url=str(data["url"]),
+    )
+
+
 def pr_view(branch: str, cwd: Path | None = None) -> PullRequest | None:
     result = subprocess.run(
         ["gh", "pr", "view", branch, "--json", "number,title,state,isDraft,url"],
@@ -26,11 +36,32 @@ def pr_view(branch: str, cwd: Path | None = None) -> PullRequest | None:
     )
     if result.returncode != 0:
         return None
-    data = json.loads(result.stdout)
-    return PullRequest(
-        number=data["number"],
-        title=data["title"],
-        state=data["state"],
-        is_draft=data["isDraft"],
-        url=data["url"],
+    return _pull_request_from_json(json.loads(result.stdout))
+
+
+def merged_pr_for_branch(branch: str, cwd: Path | None = None) -> PullRequest | None:
+    """Find a merged PR for `branch` when `gh pr view` does not resolve one."""
+    result = subprocess.run(
+        [
+            "gh",
+            "pr",
+            "list",
+            "--head",
+            branch,
+            "--state",
+            "merged",
+            "--json",
+            "number,title,state,isDraft,url",
+            "--limit",
+            "1",
+        ],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
     )
+    if result.returncode != 0:
+        return None
+    items = json.loads(result.stdout)
+    if not items:
+        return None
+    return _pull_request_from_json(items[0])

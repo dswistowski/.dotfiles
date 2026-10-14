@@ -86,6 +86,24 @@ def repos() -> None:
     commands.list_repos(console, Path.cwd())
 
 
+@cli.command("status", short_help="Show lightweight status for project clones.")
+@_repo_scope_options
+def status(all_: bool, clone_name: str | None) -> None:
+    """Show branch, dirty/unpushed state, and last fetch time per clone.
+
+    Defaults to the current repo, or to every clone under the project root
+    when run from the root itself. --all/--clone override that.
+    """
+    commands.run_status(console, Path.cwd(), all_=all_, clone=clone_name)
+
+
+@cli.command("sync", short_help="Fetch and prune remotes for project clones.")
+@_repo_scope_options
+def sync(all_: bool, clone_name: str | None) -> None:
+    """Run `git fetch --prune` for one clone or every clone under the project root."""
+    commands.sync_clones(console, Path.cwd(), all_=all_, clone=clone_name)
+
+
 @cli.command("clone", short_help=f"Create a new clone of a project.{_aliases_for('clone')}")
 @click.argument("name")
 def clone(name: str) -> None:

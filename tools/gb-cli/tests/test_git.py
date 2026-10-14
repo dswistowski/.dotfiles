@@ -24,6 +24,17 @@ def test_default_branch_falls_back_to_local_branches(git_repo: Path) -> None:
     assert git.default_branch(git_repo) == "main"
 
 
+def test_is_ancestor(git_repo: Path) -> None:
+    _git("checkout", "-b", "feature", cwd=git_repo)
+    (git_repo / "f.txt").write_text("x\n")
+    _git("add", "f.txt", cwd=git_repo)
+    _git("commit", "-m", "on feature", cwd=git_repo)
+    _git("checkout", "main", cwd=git_repo)
+    _git("merge", "--no-ff", "feature", "-m", "merge feature", cwd=git_repo)
+
+    assert git.is_ancestor("feature", "main", git_repo)
+
+
 def test_unique_commit_count(git_repo: Path) -> None:
     _git("checkout", "-b", "feature", cwd=git_repo)
     (git_repo / "new.txt").write_text("data\n")

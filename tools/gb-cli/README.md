@@ -8,6 +8,8 @@ Git branch/worktree helper with a single `gb` command and subcommands
   closed, or have no unique commits vs the default branch. Use `--dry-run` to
   preview deletions and see a summary.
 - `gb repos` (`gb l`) — run `branches` for every clone under a configured project's root.
+- `gb status` — compact per-clone status (branch, dirty, unpushed, last fetch).
+- `gb sync` — `git fetch --prune` for one clone or all clones under the project root.
 - `gb init` (`gb i`) `REMOTE [PATH]` — create or adopt PATH (default: current
   directory) as a project root for REMOTE.
 - `gb clone` (`gb c`) `NAME` — create a fresh full clone named `NAME` under
@@ -33,8 +35,8 @@ remote = "git@github.com:ledgy/ledgy-app.git"
 Each project is a directory (`root`) holding independent full clones of
 `remote` — e.g. `~/ledgy-app/default`, `~/ledgy-app/app1`,
 `~/ledgy-app/code-review`. Full clones (not worktrees) because tools like
-`gt` (Graphite) don't play well with worktrees. `clone`/`remove`/`repos`
-must be run from inside a project's `root` or any subdirectory beneath it;
+`gt` (Graphite) don't play well with worktrees. `clone`/`remove`/`repos`/`status`/
+`sync` must be run from inside a project's `root` or any subdirectory beneath it;
 `branches`/`clean` work on any git repo (e.g. inside `~/ledgy-app/default`)
 and don't need `gb.toml` at all.
 
