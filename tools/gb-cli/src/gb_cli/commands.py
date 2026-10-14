@@ -210,7 +210,13 @@ def list_repos(console: Console, cwd: Path) -> None:
 
 
 def clone_copy(console: Console, cwd: Path, name: str) -> None:
-    """Create a fresh full clone named NAME under the current project's root."""
+    """Create a fresh full clone named NAME under the current project's root.
+
+    If another clone already exists under the project root, it's used as a
+    `--reference` for the clone so objects already on disk don't need to be
+    fetched again, then `--dissociate`d so the new clone stays fully
+    independent. Either way the new clone's origin is `project.remote`.
+    """
     project = _require_project(console, cwd)
 
     target = project.root / name
@@ -218,9 +224,20 @@ def clone_copy(console: Console, cwd: Path, name: str) -> None:
         console.print(f"[red]Error[/] {escape(git.home_path(target))} already exists.")
         raise SystemExit(1)
 
-    console.print(f"[dim]Cloning[/] {escape(project.remote)} -> {escape(git.home_path(target))}")
+    reference = next(iter(_clone_dirs(project.root)), None)
+    args = ["clone"]
+    if reference is not None:
+        args += ["--reference-if-able", str(reference), "--dissociate"]
+        console.print(
+            f"[dim]Cloning[/] {escape(project.remote)} -> {escape(git.home_path(target))} "
+            f"(reusing objects from {escape(git.home_path(reference))})"
+        )
+    else:
+        console.print(f"[dim]Cloning[/] {escape(project.remote)} -> {escape(git.home_path(target))}")
+    args += [project.remote, str(target)]
+
     try:
-        git.run("clone", project.remote, str(target), cwd=project.root)
+        git.run(*args, cwd=project.root)
     except git.GitError as exc:
         console.print(f"[red]Error[/] {escape(str(exc))}")
         raise SystemExit(1) from exc

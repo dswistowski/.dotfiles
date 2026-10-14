@@ -236,6 +236,61 @@ def test_clone_copy_creates_new_clone(git_repo: Path, tmp_path: Path) -> None:
     assert (root / "app1" / ".git").exists()
 
 
+def test_clone_copy_first_clone_omits_reference(
+    git_repo: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from gb_cli import git as git_module
+
+    root = tmp_path / "root"
+    root.mkdir()
+    config.write_project(root, str(git_repo))
+    console, _ = _console()
+
+    calls: list[tuple[str, ...]] = []
+    original_run = git_module.run
+
+    def spy(*args: str, **kwargs: object) -> str:
+        calls.append(args)
+        return original_run(*args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(git_module, "run", spy)
+
+    commands.clone_copy(console, root, "app1")
+
+    clone_call = next(call for call in calls if call[0] == "clone")
+    assert "--reference-if-able" not in clone_call
+
+
+def test_clone_copy_reuses_existing_clone_as_reference(
+    git_repo: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from gb_cli import git as git_module
+
+    root = tmp_path / "root"
+    root.mkdir()
+    config.write_project(root, str(git_repo))
+    console, _ = _console()
+    commands.clone_copy(console, root, "app1")
+
+    calls: list[tuple[str, ...]] = []
+    original_run = git_module.run
+
+    def spy(*args: str, **kwargs: object) -> str:
+        calls.append(args)
+        return original_run(*args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(git_module, "run", spy)
+
+    commands.clone_copy(console, root, "app2")
+
+    clone_call = next(call for call in calls if call[0] == "clone")
+    assert "--reference-if-able" in clone_call
+    assert str(root / "app1") in clone_call
+    assert "--dissociate" in clone_call
+    assert (root / "app2" / ".git").exists()
+    assert git_module.get_remote_url(root / "app2") == str(git_repo)
+
+
 def test_clone_copy_works_from_subdirectory(git_repo: Path, tmp_path: Path) -> None:
     root = tmp_path / "root"
     (root / "default").mkdir(parents=True)
