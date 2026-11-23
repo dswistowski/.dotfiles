@@ -1,8 +1,16 @@
 #!/bin/bash
+set -euo pipefail
 
-for stow_dir in nvim tmux zsh tools git skhd alacritty
-do
-    stow $stow_dir
-done
+repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+stow_args=(--dir="$repo_dir" --target="$HOME" --no-folding)
 
-stow --no-folding codex
+case "${1-}" in
+    "") ;;
+    --dry-run) stow_args+=(--simulate --verbose) ;;
+    *)
+        printf 'Usage: %s [--dry-run]\n' "$0" >&2
+        exit 2
+        ;;
+esac
+
+stow "${stow_args[@]}" nvim tmux zsh tools git skhd alacritty codex
