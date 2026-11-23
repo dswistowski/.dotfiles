@@ -28,8 +28,9 @@ export PATH="$HOME/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/Library/Android/s
 export PATH="$HOME/google-cloud-sdk/bin:$PATH"
 export PATH="$PATH:./node_modules/.bin"
 export PATH="$PATH:$HOME/go/bin"
-export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-export PATH="/Users/damian/bin:/opt/homebrew/bin:$PATH"
+export PATH="/opt/homebrew/opt/postgresql@18/bin:/opt/homebrew/opt/libpq/bin:$PATH"
+export PATH="$HOME/bin:/opt/homebrew/bin:$PATH"
+[[ -x /opt/homebrew/opt/node@24/bin/node ]] && export PATH="/opt/homebrew/opt/node@24/bin:$PATH"
 
 # Python / pyenv
 export PATH="$PYENV_ROOT/bin:$PATH"
@@ -39,7 +40,7 @@ export PIPENV_PYTHON="$PYENV_ROOT/shims/python"
 export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
+  *) export PATH="$PATH:$PNPM_HOME:$PNPM_HOME/bin" ;;
 esac
 
 # Cargo
@@ -144,13 +145,6 @@ export AWS_PROFILE=Developer-310188666820
 export AWS_REGION=us-east-1
 export AWS_DEFAULT_REGION=us-east-1
 
-# pnpm
-export PNPM_HOME="$HOME/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME/bin:"*) ;;
-  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
-esac
-# pnpm end
 eval "$(fnm env --use-on-cd --shell zsh)"
 
 #
@@ -179,7 +173,3 @@ compdef _gt_yargs_completions gt
 export VOLTA_FEATURE_PNPM=1
 
 eval "$(direnv hook zsh)"
-
-export PNPM_HOME="/Users/dswistowski/Library/pnpm"
-
-export PATH="$PNPM_HOME/bin:$PATH"
